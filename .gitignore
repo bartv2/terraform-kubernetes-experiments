@@ -1,0 +1,4 @@
+.terraform
+id_ed25519*
+terraform.tfstate*
+debian-11-genericcloud-amd64.qcow2
