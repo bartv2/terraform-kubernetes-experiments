@@ -2,3 +2,6 @@
 id_ed25519*
 terraform.tfstate*
 debian-11-genericcloud-amd64.qcow2
+debian-12-genericcloud-amd64.qcow2
+override.tf
+*_override.tf

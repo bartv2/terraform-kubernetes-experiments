@@ -1,3 +1,4 @@
 - install terraform (https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
 - add packages: libvirt-daemon-system qemu-utils qemu-system-x86
 - ssh-keygen -f id_ed25519 -t ed25519 -C terraform@main
+- https://askubuntu.com/a/1293019 AppArmor preventing access to storage pool

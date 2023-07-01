@@ -1,13 +1,3 @@
-terraform {
-  required_version = ">= 0.13"
-    required_providers {
-      libvirt = {
-        source  = "dmacvicar/libvirt"
-        version = ">= 0.7.0"
-      }
-    }
-}
-
 provider "libvirt" {
   uri = "qemu:///system"
 }
@@ -15,44 +5,40 @@ provider "libvirt" {
 resource "libvirt_pool" "cluster" {
   name = "default"
   type = "dir"
-  path = "/home/cluster_storage"
+  path = var.pool_path
 }
 
 resource "libvirt_network" "default" {
-  name = "default"
-  addresses = ["10.17.3.0/24"]
+  name      = "default"
+  addresses = var.networks
 }
 
-module "vm" {
+module "control_plane" {
   source  = "MonolithProjects/vm/libvirt"
   version = "1.10.0"
 
-  autostart = false
-  vm_hostname_prefix = "server"
-  vm_count    = 3
-  memory      = "2048"
-  pool = libvirt_pool.cluster.name
-  vcpu        = 1
-  system_volume = 10
+  autostart          = false
+  vm_hostname_prefix = "control_plane-"
+  vm_count           = 1
+  memory             = "2048"
+  vcpu               = 1
+  system_volume      = 10
 
-  dhcp        = true
+  time_zone = "CET"
 
-#  local_admin = "local-admin"
-#  local_admin_passwd = "$6$rounds=4096$xxxxxxxxHASHEDxxxPASSWORD"
+  os_img_url = var.os_img_url
+  pool       = libvirt_pool.cluster.name
 
-  ssh_admin   = "admin"
-#  ssh_private_key = "~/.ssh/id_ed25519"
-  ssh_private_key = "id_ed25519"
-  ssh_keys    = [
-#    file("~/.ssh/id_ed25519.pub"),
-    file("id_ed25519.pub"),
-    ]
+  dhcp   = true
+  bridge = libvirt_network.default.bridge
 
-  time_zone   = "CET"
-#  https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2
-  os_img_url  = "file://${path.cwd}/debian-11-genericcloud-amd64.qcow2"
+  ssh_admin       = var.ssh_admin
+  ssh_private_key = var.ssh_private_key
+  ssh_keys = [
+    file("${var.ssh_private_key}.pub"),
+  ]
 }
 
 output "outputs" {
-  value = module.vm
+  value = module.control_plane
 }
