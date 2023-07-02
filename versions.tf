@@ -5,5 +5,9 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = ">= 0.7.0"
     }
+    ssh = {
+      source  = "loafoe/ssh"
+      version = "2.6.0"
+    }
   }
 }

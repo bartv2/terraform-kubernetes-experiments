@@ -35,3 +35,9 @@ variable "ssh_keys" {
   type        = list(string)
   default     = []
 }
+
+variable "controlplane_count" {
+  description = "Count of controle-plane vms to make"
+  type        = number
+  default     = 1
+}
