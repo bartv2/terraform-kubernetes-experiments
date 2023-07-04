@@ -41,3 +41,9 @@ variable "controlplane_count" {
   type        = number
   default     = 1
 }
+
+variable "http_proxy" {
+  description = "apt http_proxy"
+  type        = string
+  default     = ""
+}

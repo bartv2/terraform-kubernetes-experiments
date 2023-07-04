@@ -10,13 +10,14 @@ resource "libvirt_pool" "cluster" {
 
 locals {
   controleplane_network = var.networks[0]
-  controleplane_ips = [for i in range(2, 2+var.controlplane_count): cidrhost(local.controleplane_network, i)]
+  controleplane_ips     = [for i in range(2, 2 + var.controlplane_count) : cidrhost(local.controleplane_network, i)]
+  domainname            = "k8s.lab"
 }
 
 resource "libvirt_network" "default" {
   name      = "default"
   addresses = var.networks
-  domain    = "k8s.local"
+  domain    = local.domainname
   bridge    = "virbr0"
   dns {
     hosts {
@@ -27,8 +28,7 @@ resource "libvirt_network" "default" {
 }
 
 module "control_plane" {
-  source  = "MonolithProjects/vm/libvirt"
-  version = "1.10.0"
+  source = "./modules/vm"
 
   autostart          = false
   vm_hostname_prefix = "controlplane-"
@@ -42,12 +42,15 @@ module "control_plane" {
   os_img_url = var.os_img_url
   pool       = libvirt_pool.cluster.name
 
-#  dhcp = true
-  ip_address  = local.controleplane_ips
-  ip_gateway  = cidrhost(local.controleplane_network, 1)
+  #  dhcp = true
+  vm_domain     = local.domainname
+  ip_address    = local.controleplane_ips
+  ip_gateway    = cidrhost(local.controleplane_network, 1)
   ip_nameserver = cidrhost(local.controleplane_network, 1)
 
   bridge = libvirt_network.default.bridge
+
+  http_proxy = var.http_proxy
 
   ssh_admin       = var.ssh_admin
   ssh_private_key = var.ssh_private_key
