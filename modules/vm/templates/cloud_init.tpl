@@ -25,6 +25,7 @@ packages:
   - kubectl
   - containerd
   - containernetworking-plugins
+  - etcd-client
 
 runcmd:
 ${runcmd}
@@ -98,6 +99,21 @@ write_files:
     content: "br_netfilter"
   - path: /etc/sysctl.d/50-kubeadm.conf
     content: "net.ipv4.ip_forward = 1"
+  - path: /etc/crictl.yaml
+    content: |
+      runtime-endpoint: unix:///var/run/containerd/containerd.sock
+      image-endpoint: unix:///var/run/containerd/containerd.sock
+  - path: /etc/containerd/config.toml
+    content: |
+        ${ indent(8, file("${path}/templates/containerd-config.toml")) }
+  - path: /etc/cni/net.d/10-containerd-net.conflist
+    content: |
+        ${ indent(8, file("${path}/templates/10-containerd-net.conflist")) }
+  - path: /usr/local/bin/install-kubeadm.sh
+    permissions: 0o755
+    content: |
+        ${ indent(8, file("${path}/templates/install-kubeadm.sh")) }
+
 growpart:
     mode: auto
     devices:
