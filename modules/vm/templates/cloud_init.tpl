@@ -28,6 +28,10 @@ packages:
   - etcd-client
 
 runcmd:
+  - [ systemctl, daemon-reload ]
+  - [ systemctl, enable, qemu-guest-agent ]
+  - [ systemctl, start, qemu-guest-agent ]
+  - [ systemctl, restart, systemd-networkd ]
 ${runcmd}
 
 fqdn: ${hostname}
@@ -61,18 +65,13 @@ write_files:
         HostKey /etc/ssh/ssh_host_dsa_key
         HostKey /etc/ssh/ssh_host_ecdsa_key
         HostKey /etc/ssh/ssh_host_ed25519_key
-        UsePrivilegeSeparation yes
-        KeyRegenerationInterval 3600
-        ServerKeyBits 1024
         SyslogFacility AUTH
         LogLevel INFO
         LoginGraceTime 120
         PermitRootLogin no
         StrictModes yes
-        RSAAuthentication yes
         PubkeyAuthentication yes
         IgnoreRhosts yes
-        RhostsRSAAuthentication no
         HostbasedAuthentication no
         PermitEmptyPasswords no
         ChallengeResponseAuthentication no
@@ -113,6 +112,10 @@ write_files:
     permissions: 0o755
     content: |
         ${ indent(8, file("${path}/templates/install-kubeadm.sh")) }
+  - path: /usr/local/bin/remove-node.sh
+    permissions: 0o755
+    content: |
+        ${ indent(8, file("${path}/templates/remove-node.sh")) }
 
 growpart:
     mode: auto
