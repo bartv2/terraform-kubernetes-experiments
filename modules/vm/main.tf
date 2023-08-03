@@ -70,6 +70,10 @@ resource "libvirt_domain" "virt-machine" {
     autoport    = true
   }
 
+  timeouts {
+    create = "10m"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "echo \"Virtual Machine \"$(hostname)\" is UP!\"",

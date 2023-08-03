@@ -42,6 +42,12 @@ variable "controlplane_count" {
   default     = 1
 }
 
+variable "worker_count" {
+  description = "Count of worker vms to make"
+  type        = number
+  default     = 2
+}
+
 variable "http_proxy" {
   description = "apt http_proxy"
   type        = string

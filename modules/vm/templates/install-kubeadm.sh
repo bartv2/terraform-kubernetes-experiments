@@ -12,14 +12,16 @@ sysctl --system
 
 ENDPOINT=$1
 TOKEN=$2
-CERT_KEY=$3
-OTHER_JOIN_ARGS=${*:4}
+CERT_KEY=$4
+OTHER_JOIN_ARGS=${*:3}
 
 INIT=0
 if [ `hostname` = 'controlplane-01' ]; then INIT=1 ; fi
 
 if [ $INIT -eq 1 ]; then
   kubeadm init --control-plane-endpoint=$ENDPOINT --upload-certs --certificate-key $CERT_KEY --token $TOKEN
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+  kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
 else
-  kubeadm join $ENDPOINT --certificate-key $CERT_KEY --token $TOKEN $OTHER_JOIN_ARGS
+  kubeadm join $ENDPOINT --token $TOKEN $OTHER_JOIN_ARGS
 fi

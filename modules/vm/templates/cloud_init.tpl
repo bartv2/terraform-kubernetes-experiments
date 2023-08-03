@@ -30,9 +30,9 @@ packages:
 runcmd:
   - [ systemctl, daemon-reload ]
   - [ systemctl, enable, qemu-guest-agent ]
-  - [ systemctl, start, qemu-guest-agent ]
   - [ systemctl, restart, systemd-networkd ]
 ${runcmd}
+  - [ systemctl, start, qemu-guest-agent ]
 
 fqdn: ${hostname}
 
@@ -105,9 +105,6 @@ write_files:
   - path: /etc/containerd/config.toml
     content: |
         ${ indent(8, file("${path}/templates/containerd-config.toml")) }
-  - path: /etc/cni/net.d/10-containerd-net.conflist
-    content: |
-        ${ indent(8, file("${path}/templates/10-containerd-net.conflist")) }
   - path: /usr/local/bin/install-kubeadm.sh
     permissions: 0o755
     content: |

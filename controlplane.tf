@@ -13,6 +13,7 @@ locals {
   controleplane_ips          = [for i in range(2, 2 + var.controlplane_count) : cidrhost(local.controleplane_network, i)]
   domainname                 = "k8s.lab"
   cluster_endpoint           = "cluster-endpoint.${local.domainname}"
+  cluster_endpoint_ip        = module.control_plane.ip_address[0]
   cluster_endpoint_with_user = "${var.ssh_admin}@${local.cluster_endpoint}"
   kubeadm_token_id           = substr(random_password.kubeadm_token.result, 0, 6)
   kubeadm_token              = join(".", [local.kubeadm_token_id, substr(random_password.kubeadm_token.result, 6, 16)])
@@ -51,18 +52,19 @@ module "control_plane" {
   ]
 
   runcmd = [
-    "install-kubeadm.sh ${local.cluster_endpoint}:6443 ${local.kubeadm_token} ${local.kubeadm_certificate_key} --control-plane --discovery-token-unsafe-skip-ca-verification"
+    "install-kubeadm.sh ${local.cluster_endpoint}:6443 ${local.kubeadm_token} --certificate-key ${local.kubeadm_certificate_key} --control-plane --discovery-token-unsafe-skip-ca-verification"
   ]
 }
 
 resource "ssh_resource" "control_plane_certs" {
-  host        = module.control_plane.ip_address[0]
+  host        = local.cluster_endpoint_ip
   user        = var.ssh_admin
   private_key = var.ssh_private_key
   timeout     = "1m"
 
   triggers = {
     count_changes = length(local.controleplane_ips)
+    workers = var.worker_count
   }
   commands = [
     "sudo kubeadm init phase upload-certs --upload-certs --certificate-key ${local.kubeadm_certificate_key}",
